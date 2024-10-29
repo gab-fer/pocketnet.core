@@ -172,6 +172,7 @@ bool CheckStake(const std::shared_ptr<CBlock> pblock, const PocketBlockRef& pock
 
     // verify hash target and signature of coinstake tx
     CDataStream hashProofOfStakeSource(SER_GETHASH, 0);
+    LogPrint(BCLog::STAKEMODIF, "CheckStake(): check proof-of-stake signature for new created block %s", pblock->GetHash().GetHex());
     if (!CheckProofOfStake(chainman.BlockIndex()[pblock->hashPrevBlock], pblock->vtx[1], pblock->nBits, proofHash,
         hashProofOfStakeSource, hashTarget, NULL, mempool))
     {
@@ -357,11 +358,11 @@ bool CheckStakeKernelHash(CBlockIndex *pindexPrev, unsigned int nBits, CBlockInd
     // Now check if proof-of-stake hash meets target protocol
     if (hashProofOfStake > bnTarget)
     {
-        LogPrint(BCLog::STAKEMODIF, "CheckStakeKernelHash() : hashProofOfStake(%s) > bnTarget (%s)\n", hashProofOfStake.GetHex(), bnTarget.GetHex());
+        LogPrint(BCLog::STAKEMODIF, "CheckStakeKernelHash() : Failed : hashProofOfStake(%s) > bnTarget (%s)\n", hashProofOfStake.GetHex(), bnTarget.GetHex());
         return false;
     }
 
-    LogPrint(BCLog::STAKEMODIF, "CheckStakeKernelHash() : hashProofOfStake(%s) <= bnTarget (%s)\n", hashProofOfStake.GetHex(), bnTarget.GetHex());
+    LogPrint(BCLog::STAKEMODIF, "CheckStakeKernelHash() : Ok : hashProofOfStake(%s) <= bnTarget (%s)\n", hashProofOfStake.GetHex(), bnTarget.GetHex());
     return true;
 }
 
