@@ -74,7 +74,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: MacOS_arm64
-          path: ./Pocketnet-Core.dmg
+          path: |
+            ./Pocketnet-Core.dmg
+            ./src/pocketcoind
 
   build-macos-amd64:
     runs-on: macos-13
@@ -99,4 +101,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: MacOS_amd64
-          path: ./Pocketnet-Core.dmg
+          path: |
+            ./Pocketnet-Core.dmg
+            ./src/pocketcoind
