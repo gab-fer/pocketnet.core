@@ -325,6 +325,8 @@ namespace GUIUtil
      * QDate::startOfDay() was introduced in Qt 5.14.
      */
     QDateTime StartOfDay(const QDate& date);
+    
+    /**
      * Queue a function to run in an object's event loop. This can be
      * replaced by a call to the QMetaObject::invokeMethod functor overload after Qt 5.10, but
      * for now use a QObject::connect for compatibility with older Qt versions, based on
