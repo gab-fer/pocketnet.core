@@ -33,9 +33,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: ${{ fromJson(github.event.inputs.platform == 'all' && '["unix","win","macos"]' || format('["{0}"]', github.event.inputs.platform)) }}
-        exclude:
-          - platform: macos
+        platform: ${{ fromJson(github.event.inputs.platform == 'all' && '["unix","win"]' || format('["{0}"]', github.event.inputs.platform)) }}
     runs-on: ubuntu-latest
     steps:
       - name: Get branch name
@@ -47,14 +45,62 @@ jobs:
           branch: ${{ steps.branch-name.outputs.ref_branch }}
           depsBase: ${{ github.event.inputs.depsBase }}
           tag: ${{ github.event.inputs.tag }}
-      - name: Check current directory
-        run: |
-          pwd
-          ls -la
-          ls -la ./out/
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.platform }}
           path: ./out
-          
+
+  build-macos-arm64:
+    runs-on: macos-14
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.branch-name.outputs.ref_branch }}
+      - name: Install general dependencies
+        run: brew install automake make libtool miniupnpc protobuf qrencode librsvg python-setuptools
+      - name: Build depends
+        run: cd depends && make && cd ..
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix=$PWD/depends/arm-apple-darwin23.6.0
+      - name: Make
+        run: |
+          make
+          make deploy
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS_arm64
+          path: |
+            ./Pocketnet-Core.dmg
+            ./src/pocketcoind
+
+  build-macos-amd64:
+    runs-on: macos-13
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+      - name: Install general dependencies
+        run: |
+          brew install automake make libtool miniupnpc protobuf qrencode librsvg python-setuptools berkeley-db4
+          pip3 install setuptools
+      - name: Build depends
+        run: cd depends && make && cd ..
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix=$PWD/depends/x86_64-apple-darwin22.6.0
+      - name: Make
+        run: |
+          make
+          make deploy
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: MacOS_amd64
+          path: |
+            ./Pocketnet-Core.dmg
+            ./src/pocketcoind
