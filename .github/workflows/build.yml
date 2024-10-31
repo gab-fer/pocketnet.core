@@ -50,7 +50,6 @@ jobs:
         run: |
           VERSION=${{ needs.prepare.outputs.version }}
           mkdir ./out/
-          ls -l
           cp ./release/usr/local/bin/pocketcoind ./out/pocketnetcore_${VERSION}_linux_x64_daemon.bin
           cp ./pocketnetcore_*_linux_x64_setup.deb ./out/pocketnetcore_${VERSION}_linux_x64_setup.deb
           cp ./pocketnetcore_*_linux_x64.tar.gz ./out/pocketnetcore_${VERSION}_linux_x64.tar.gz
@@ -118,7 +117,6 @@ jobs:
         run: |
           VERSION=${{ needs.prepare.outputs.version }}
           mkdir ./out/
-          ls -l
           cp ./src/pocketcoind ./out/pocketnetcore_${VERSION}_macos_arm64_daemon.bin
           cp ./Pocketnet-Core.dmg ./out/pocketnetcore_${VERSION}_macos_arm64_setup.dmg
       - name: Upload artifacts
@@ -151,7 +149,6 @@ jobs:
         run: |
           VERSION=${{ needs.prepare.outputs.version }}
           mkdir ./out/
-          ls -l
           cp ./src/pocketcoind ./out/pocketnetcore_${VERSION}_macos_x64_daemon.bin
           cp ./Pocketnet-Core.dmg ./out/pocketnetcore_${VERSION}_macos_x64_setup.dmg
       - name: Upload artifacts
