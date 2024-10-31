@@ -51,7 +51,7 @@ jobs:
           VERSION=${{ needs.prepare.outputs.version }}
           mkdir ./out/
           ls -l
-          cp ./release/usr/local/bin/ ./out/pocketnetcore_${VERSION}_linux_x64_daemon.bin
+          cp ./release/usr/local/bin/pocketcoind ./out/pocketnetcore_${VERSION}_linux_x64_daemon.bin
           cp ./pocketnetcore_*_linux_x64_setup.deb ./out/pocketnetcore_${VERSION}_linux_x64_setup.deb
           cp ./pocketnetcore_*_linux_x64.tar.gz ./out/pocketnetcore_${VERSION}_linux_x64.tar.gz
       - name: Upload artifacts
