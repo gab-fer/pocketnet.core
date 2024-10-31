@@ -989,6 +989,7 @@ QDateTime StartOfDay(const QDate& date)
 #else
     return QDateTime(date);
 #endif
+}
 
 QString MakeHtmlLink(const QString& source, const QString& link)
 {
