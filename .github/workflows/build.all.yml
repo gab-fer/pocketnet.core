@@ -1,28 +1,9 @@
-name: Build
-run-name: "Build: ${{ inputs.platform }} . ${{ inputs.depsBase }} . ${{ inputs.tag || 'latest' }} . ${{ github.ref_name }}"
+name: Build test
+run-name: "Build: ${{ github.ref_name }} . ${{ inputs.tag || 'latest' }}"
 
 on:
   workflow_dispatch:
     inputs:
-      platform:
-        description: 'Destination platform'
-        required: true
-        default: all
-        type: choice
-        options:
-          - all
-          - unix
-          - win
-          # - macos
-      depsBase:
-         description: 'Base branch for use dependencies'
-         required: true
-         default: '0.22'
-         type: choice
-         options:
-           - '0.20'
-           - '0.21'
-           - '0.22'
       tag:
         description: 'Specific tag for building'
         required: false
@@ -30,26 +11,55 @@ on:
         
 jobs:
 
-  build:
-    strategy:
-      matrix:
-        platform: ${{ fromJson(github.event.inputs.platform == 'all' && '["unix","win"]' || format('["{0}"]', github.event.inputs.platform)) }}
-    runs-on: ubuntu-latest
+  prepare:
+    runs-on: ubuntu-20.04
+    outputs:
+      version: ${{ steps.version.outputs.value }}
     steps:
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v7.0.7
-      - uses: andyoknen/pocketnetcore-build-action@v3
+      - name: Check out Git repository
+        uses: actions/checkout@v4
         with:
-          platform: ${{ matrix.platform }}
-          branch: ${{ steps.branch-name.outputs.ref_branch }}
-          depsBase: ${{ github.event.inputs.depsBase }}
-          tag: ${{ github.event.inputs.tag }}
+          ref: ${{ github.event.inputs.tag || steps.branch-name.outputs.ref_branch }}
+      - name: Detect actual version
+        id: version
+        run: |
+          VERSION=$(./share/version.sh)
+          echo "value=$VERSION" >> $GITHUB_OUTPUT
+
+  build-linux:
+    runs-on: ubuntu-20.04
+    needs: prepare
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || steps.branch-name.outputs.ref_branch }}
+      - name: Install general dependencies
+        run: sudo apt update && sudo apt install -y build-essential libtool autotools-dev automake pkg-config libssl-dev libevent-dev bsdmainutils python3 libboost-system-dev libboost-filesystem-dev libboost-chrono-dev libboost-test-dev libboost-thread-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libqrencode-dev libzmq3-dev libminiupnpc-dev
+      - name: Build depends
+        run: cd depends && make HOST=x86_64-pc-linux-gnu && cd ..
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --prefix=$PWD/depends/x86_64-pc-linux-gnu
+      - name: Make
+        run: |
+          make
+          make deploy
+      - name: Prepare output binaries
+        run: |
+          VERSION=${{ needs.prepare.outputs.version }}
+          mkdir ./out/
+          ls -l
+          cp ./src/pocketcoind ./out/pocketnetcore_${VERSION}_linux_x64_daemon.bin
+          cp ./pocketnetcore_*_linux_x64_setup.deb ./out/pocketnetcore_${VERSION}_linux_x64_setup.deb
+          cp ./pocketnetcore_*_linux_x64.tar.gz ./out/pocketnetcore_${VERSION}_linux_x64.tar.gz
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.platform }}
-          path: ./out
+          name: Linux_amd64
+          path: ./out/*
+
 
   build-macos-arm64:
     runs-on: macos-14
