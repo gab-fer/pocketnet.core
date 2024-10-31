@@ -55,7 +55,7 @@ jobs:
           cp ./pocketnetcore_*_linux_x64_setup.deb ./out/pocketnetcore_${VERSION}_linux_x64_setup.deb
           cp ./pocketnetcore_*_linux_x64.tar.gz ./out/pocketnetcore_${VERSION}_linux_x64.tar.gz
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux_amd64
           path: ./out/*
@@ -89,7 +89,7 @@ jobs:
           cp ./release/pocketcoind.exe ./out/pocketnetcore_${VERSION}_win_x64_daemon.bin
           cp ./pocketnetcore_*_win_x64_setup.exe ./out/pocketnetcore_${VERSION}_win_x64_setup.exe
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Linux_amd64
           path: ./out/*
@@ -114,7 +114,7 @@ jobs:
           make
           make deploy
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MacOS_arm64
           path: |
@@ -141,7 +141,7 @@ jobs:
           make
           make deploy
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MacOS_amd64
           path: |
