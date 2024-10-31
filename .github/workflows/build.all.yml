@@ -128,7 +128,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install general dependencies
         run: |
-          brew install automake make libtool miniupnpc protobuf qrencode librsvg python-setuptools berkeley-db4
+          brew install automake make miniupnpc protobuf qrencode librsvg python-setuptools berkeley-db@4
           pip3 install setuptools
       - name: Build depends
         run: cd depends && make && cd ..
