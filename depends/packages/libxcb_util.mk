@@ -6,8 +6,8 @@ $(package)_sha256_hash=0ed0934e2ef4ddff53fcc70fc64fb16fe766cd41ee00330312e20a985
 $(package)_dependencies=libxcb
 
 define $(package)_set_vars
-$(package)_config_opts = --disable-shared --disable-devel-docs --without-doxygen
-$(package)_config_opts += --disable-dependency-tracking --enable-option-checking --with-pic
+  $(package)_config_opts = --disable-shared --disable-devel-docs --without-doxygen --with-pic
+  $(package)_config_opts += --disable-dependency-tracking --enable-option-checking
 endef
 
 define $(package)_preprocess_cmds
