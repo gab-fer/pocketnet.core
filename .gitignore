@@ -162,7 +162,8 @@ db4/
 
 osx_volname
 dist/
-*.background.tiff
+*.background.tiff*
+background.tiff*
 
 /confdefs.h
 /build_msvc/pocketcoind/testdb

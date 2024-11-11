@@ -545,7 +545,7 @@ if platform.system() == "Darwin":
     subprocess.check_call(f"codesign --deep --force --sign - {target}", shell=True)
 
 if config.dmg is not None:
-    pass # Moved to contrib/macdeploy/createdmg.py
+    print(f"+ Run `./contrib/macdeploy/createdmg {app_bundle} {appname}` for create DMG image after Sign and Notarize +")
 
 # ------------------------------------------------
 

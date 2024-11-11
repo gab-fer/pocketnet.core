@@ -1,5 +1,23 @@
 #!/usr/bin/env python3
 
+import sys, re, os, platform, shutil, stat, subprocess, os.path
+from subprocess import PIPE, run
+from argparse import ArgumentParser
+
+ap = ArgumentParser(description="Simple create dmg file for builded app")
+
+ap.add_argument("app_bundle", nargs=1, metavar="app-bundle", help="application bundle to be deployed")
+ap.add_argument("appname", nargs=1, metavar="appname", help="name of the app being deployed")
+ap.add_argument("-verbose", nargs="?", const=True, help="Output additional debugging information")
+
+config = ap.parse_args()
+
+verbose = config.verbose
+app_bundle = config.app_bundle[0]
+appname = config.appname[0]
+
+# --------------------------------------------
+
 print("+ Preparing .dmg disk image +")
 
 if verbose:
