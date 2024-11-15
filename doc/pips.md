@@ -9,3 +9,4 @@ PIPs that are implemented by Pocketcoin Core:
 * `PIP 106`: Allow restore deleted account. ([PR #700](https://github.com/pocketnetteam/pocketnet.core/wiki/PIP-106:-Allow-restore-deleted-account))
 * `PIP 107`: Increase the time limit for editing content. ([PR #702](https://github.com/pocketnetteam/pocketnet.core/wiki/PIP-107:-Increase-the-time-limit-for-editing-content))
 * `PIP 108`: Extend moderation flag categories. ([PR #737](https://github.com/pocketnetteam/pocketnet.core/wiki/PIP-108:-Extend-moderation-flag-categories))
+* `PIP 109`: Enable moderation subsystem for Barteron. ([PR #767](https://github.com/pocketnetteam/pocketnet.core/wiki/PIP-109:-Moderation-on-Barteron,-Boost-for-Barteron-offers-and-Multi‐Contetnt-Collections))
