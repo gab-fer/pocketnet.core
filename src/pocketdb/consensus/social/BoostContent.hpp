@@ -73,7 +73,7 @@ namespace PocketConsensus
             return false;
         }
 
-        vector<PocketTx::TxType> AllowedContentTypes()
+        virtual vector<PocketTx::TxType> AllowedContentTypes()
         {
             return { CONTENT_POST, CONTENT_VIDEO, CONTENT_ARTICLE, CONTENT_STREAM, CONTENT_AUDIO, APP, CONTENT_DELETE };
         }

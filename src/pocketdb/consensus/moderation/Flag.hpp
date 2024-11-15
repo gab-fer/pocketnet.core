@@ -116,7 +116,7 @@ namespace PocketConsensus
             return { *ptx->GetAddress(), *ptx->GetContentAddressHash() };
         }
 
-        vector<PocketTx::TxType> AllowedContentTypes()
+        virtual vector<PocketTx::TxType> AllowedContentTypes()
         {
             return {
                 ACCOUNT_USER,
