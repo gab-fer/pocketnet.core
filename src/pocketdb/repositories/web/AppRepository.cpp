@@ -43,6 +43,8 @@ namespace PocketDb
                             r.Uid = ct.Uid
                     where
                         t.Type in (221) and
+                        (? or t.RegId1 = (select r.RowId from Registry r where r.String = ?)),
+                        (? or t.RegId2 = (select r.RowId from Registry r where r.String = ?)),
                         (? or t.RowId in (
                             select
                                 tm.ContentId
@@ -72,6 +74,10 @@ namespace PocketDb
                 )sql")
                 .Bind(
                     args.Page.TopHeight,
+                    args.Address.empty(),
+                    args.Address,
+                    args.Id.empty(),
+                    args.Id,
                     args.Tags.empty(),
                     args.Tags,
                     args.Search.empty(),
