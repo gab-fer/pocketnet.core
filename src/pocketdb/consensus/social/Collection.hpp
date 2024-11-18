@@ -28,8 +28,10 @@ namespace PocketConsensus
         tuple<bool, SocialConsensusResult> Validate(const CTransactionRef& tx, const CollectionRef& ptx, const PocketBlockRef& block) override
         {
             // Base validation with calling block or mempool check
-            if (auto[baseValidate, baseValidateCode] = SocialConsensus::Validate(tx, ptx, block); !baseValidate)
-                return {false, baseValidateCode};
+            if (!block) {
+                if (auto[baseValidate, baseValidateCode] = SocialConsensus::Validate(tx, ptx, block); !baseValidate)
+                    return {false, baseValidateCode};
+            }
 
             if(auto[contentIdsOk, contentIds] = ptx->GetContentIdsVector(); contentIdsOk)
             {
@@ -50,7 +52,7 @@ namespace PocketConsensus
             if (ptx->IsEdit())
                 return ValidateEdit(ptx);
 
-            return Success;
+            return SocialConsensus::Validate(tx, ptx, block);
         }
         
         tuple<bool, SocialConsensusResult> Check(const CTransactionRef& tx, const CollectionRef& ptx) override
@@ -222,10 +224,44 @@ namespace PocketConsensus
         }
     };
 
-    class CollectionConsensus_pip109 : public CollectionConsensus
+    class CollectionConsensus_fix_check : public CollectionConsensus
     {
     public:
-        CollectionConsensus_pip109() : CollectionConsensus() {}
+        CollectionConsensus_fix_check() : CollectionConsensus() {}
+
+        tuple<bool, SocialConsensusResult> Validate(const CTransactionRef& tx, const CollectionRef& ptx, const PocketBlockRef& block) override
+        {
+            // Base validation with calling block or mempool check
+            if (auto[baseValidate, baseValidateCode] = SocialConsensus::Validate(tx, ptx, block); !baseValidate)
+                return {false, baseValidateCode};
+
+            if(auto[contentIdsOk, contentIds] = ptx->GetContentIdsVector(); contentIdsOk)
+            {
+                // Check count of content ids
+                if (contentIds.size() > (size_t)GetConsensusLimit(ConsensusLimit_collection_ids_count))
+                   return {false, ConsensusResult_Failed};
+
+                // Contents should be exists in chain
+                int count = PocketDb::ConsensusRepoInst.GetLastContentsCount(contentIds, { PocketTx::TxType(*ptx->GetContentTypes()) });
+                if((size_t)count != contentIds.size())
+                    return {false, ConsensusResult_Failed};
+            }
+            else
+            {
+                return {false, ConsensusResult_Failed};
+            }
+
+            if (ptx->IsEdit())
+                return ValidateEdit(ptx);
+
+            return Success;
+        }
+    };
+
+    class CollectionConsensus_pip109 : public CollectionConsensus_fix_check
+    {
+    public:
+        CollectionConsensus_pip109() : CollectionConsensus_fix_check() {}
 
         tuple<bool, SocialConsensusResult> Validate(const CTransactionRef& tx, const CollectionRef& ptx, const PocketBlockRef& block) override
         {
@@ -300,6 +336,7 @@ namespace PocketConsensus
         CollectionConsensusFactory()
         {
             Checkpoint({ 2162400, 1531000, -1, make_shared<CollectionConsensus>() });
+            Checkpoint({ 2583000, 2280000, -1, make_shared<CollectionConsensus_fix_check>() });
             Checkpoint({ 9999999, 9999999,  0, make_shared<CollectionConsensus_pip109>() });
         }
     };
