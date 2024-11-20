@@ -104,10 +104,11 @@ Changes:
 ## `PIP 109`: Moderation on Barteron, Boost for Barteron offers and Multi‐Contetnt Collections
 
 Fork start at:
-- Main net: 9999999
-- Test net: 9999999
+- Main net: 3291900
+- Test net: 3373650
 
 Changes:
 - Enabling the moderation subsystem for Barteron transactions (Flags for Offers and Accounts). [PR #767](https://github.com/pocketnetteam/pocketnet.core/pull/767)
 - Enabling Boosts for Barteron Offers [PR #767](https://github.com/pocketnetteam/pocketnet.core/pull/767)
 - Policy change restriction on the type of content in collections - now we cannot mix content (Posts and Videos, for example). This PIP changes this behavior by disabling this restriction. [PR #767](https://github.com/pocketnetteam/pocketnet.core/pull/767)
+- Fix count limit for complain transaction. [PR #767](https://github.com/pocketnetteam/pocketnet.core/pull/767)

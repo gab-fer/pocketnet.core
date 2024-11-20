@@ -337,7 +337,7 @@ namespace PocketConsensus
         {
             Checkpoint({ 2162400, 1531000, -1, make_shared<CollectionConsensus>() });
             Checkpoint({ 2583000, 2280000, -1, make_shared<CollectionConsensus_fix_check>() });
-            Checkpoint({ 9999999, 9999999,  0, make_shared<CollectionConsensus_pip109>() });
+            Checkpoint({ 3291900, 3373650,  0, make_shared<CollectionConsensus_pip109>() });
         }
     };
 

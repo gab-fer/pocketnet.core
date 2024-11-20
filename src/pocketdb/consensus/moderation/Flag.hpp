@@ -152,7 +152,7 @@ namespace PocketConsensus
         ModerationFlagConsensusFactory()
         {
             Checkpoint({       0,       0, -1, make_shared<ModerationFlagConsensus>() });
-            Checkpoint({ 9999999, 9999999,  0, make_shared<ModerationFlagConsensus_pip_109>() });
+            Checkpoint({ 3291900, 3373650,  0, make_shared<ModerationFlagConsensus_pip_109>() });
         }
     };
 
