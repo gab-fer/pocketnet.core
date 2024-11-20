@@ -44,7 +44,7 @@ namespace PocketDb
                     where
                         t.Type in (221) and
                         (? or t.RegId1 = (select r.RowId from Registry r where r.String = ?)) and
-                        (? or t.RegId2 = (select r.RowId from Registry r where r.String = ?)) and
+                        (? or pt.String2 = ?) and
                         (? or t.RowId in (
                             select
                                 tm.ContentId
@@ -65,7 +65,7 @@ namespace PocketDb
                                 web.ContentMap cm
                             where
                                 c.ROWID = cm.ROWID and
-                                cm.FieldType in (3,5) and
+                                cm.FieldType in (10,11,14) and
                                 c.Value match ?
                         ))
                     order by
