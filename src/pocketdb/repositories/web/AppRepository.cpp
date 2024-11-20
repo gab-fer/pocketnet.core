@@ -44,7 +44,7 @@ namespace PocketDb
                     where
                         t.Type in (221) and
                         (? or t.RegId1 = (select r.RowId from Registry r where r.String = ?)) and
-                        (? or t.RegId2 = (select r.RowId from Registry r where r.String = ?)) and
+                        (? or pt.String2 = ?) and
                         (? or t.RowId in (
                             select
                                 tm.ContentId
