@@ -65,7 +65,7 @@ namespace PocketDb
                                 web.ContentMap cm
                             where
                                 c.ROWID = cm.ROWID and
-                                cm.FieldType in (3,5) and
+                                cm.FieldType in (10,11,14) and
                                 c.Value match ?
                         ))
                     order by
