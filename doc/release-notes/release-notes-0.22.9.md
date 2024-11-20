@@ -30,7 +30,7 @@ Compatibility
 Pocketnet Core is supported and extensively tested on operating systems
 using the Debian Linux, Ubuntu Linux 20+ (and clones like Mint Linux, etc.), macOS 10.15+ and
 Windows 7 and newer. Pocketnet Core should also work on most other Unix-like systems but
-is not as frequently tested on them.  It is not recommended to use Pocketnet Core on
+is not as frequently tested on them. It is not recommended to use Pocketnet Core on
 unsupported systems.
 
 Notable changes
@@ -38,6 +38,9 @@ Notable changes
 
 Consensus
 ---------
+- Enabling the moderation subsystem for Barteron transactions (PIP 109)
+- Enabling Boosts for Barteron Offers (PIP 109)
+- Allow mixing of content in collections (PIP 109)
 
 General
 -------

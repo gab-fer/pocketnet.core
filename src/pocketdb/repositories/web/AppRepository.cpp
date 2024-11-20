@@ -43,8 +43,8 @@ namespace PocketDb
                             r.Uid = ct.Uid
                     where
                         t.Type in (221) and
-                        (? or t.RegId1 = (select r.RowId from Registry r where r.String = ?)),
-                        (? or t.RegId2 = (select r.RowId from Registry r where r.String = ?)),
+                        (? or t.RegId1 = (select r.RowId from Registry r where r.String = ?)) and
+                        (? or t.RegId2 = (select r.RowId from Registry r where r.String = ?)) and
                         (? or t.RowId in (
                             select
                                 tm.ContentId
