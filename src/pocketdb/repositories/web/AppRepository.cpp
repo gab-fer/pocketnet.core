@@ -12,6 +12,7 @@ namespace PocketDb
         vector<string> result;
 
         string _keyword = "\"" + args.Search + "\"" + " OR " + args.Search + "*";
+        boost::replace_all(_keyword, ".", "_");
 
         string _orderBy = " ct.Height ";
         if (args.Page.OrderBy == "rating")
