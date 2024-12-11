@@ -214,7 +214,7 @@ enum opcodetype
 };
 
 // Maximum value that an opcode can be
-static const unsigned int MAX_OPCODE = OP_WINNER_COMMENT;
+static const unsigned int MAX_OPCODE = OP_WINNER_MODERATION_VOTE;
 
 std::string GetOpName(opcodetype opcode);
 

@@ -122,9 +122,12 @@ namespace PocketConsensus
             for (const auto& tx : block.vtx)
             {
                 // Parse data for moderation votes
-                // TODO (aok) : Implement it
-
-
+                auto[parseModerationVoteOk, moderationVoteTxData] = TransactionHelper::ParseModerationVote(tx);
+                if (parseModerationVoteOk)
+                {
+                    _winners.ModerationVoteWinners.push_back(moderationVoteTxData->AddressHash);
+                    continue;
+                }
 
                 // Get destination address and score value
                 // In lottery allowed only likes to posts and comments
@@ -313,10 +316,10 @@ namespace PocketConsensus
         }
     };
 
-    class LotteryConsensus_pip_109 : public LotteryConsensus_checkpoint_1180000
+    class LotteryConsensus_pip_110 : public LotteryConsensus_checkpoint_1180000
     {
     public:
-        LotteryConsensus_pip_109() : LotteryConsensus_checkpoint_1180000()
+        LotteryConsensus_pip_110() : LotteryConsensus_checkpoint_1180000()
         {
             Limits.Set("max_winners_counts", 5, 5, 5);
         }
@@ -341,9 +344,9 @@ namespace PocketConsensus
             Checkpoint({  514185,      -1, -1, make_shared<LotteryConsensus_checkpoint_514185>() });
             Checkpoint({ 1035000,      -1, -1, make_shared<LotteryConsensus_checkpoint_1035000>() });
             Checkpoint({ 1124000,      -1, -1, make_shared<LotteryConsensus_checkpoint_1124000>() });
-            Checkpoint({ 1180000,       0,  0, make_shared<LotteryConsensus_checkpoint_1180000>() });
-            Checkpoint({ 2162400, 1650652,  0, make_shared<LotteryConsensus_pip_100>() });
-            Checkpoint({ 3291900, 3373650,  0, make_shared<LotteryConsensus_pip_109>() });
+            Checkpoint({ 1180000,       0, -1, make_shared<LotteryConsensus_checkpoint_1180000>() });
+            Checkpoint({ 2162400, 1650652, -1, make_shared<LotteryConsensus_pip_100>() });
+            Checkpoint({ 3291900, 3500000,  0, make_shared<LotteryConsensus_pip_110>() });
         }
     };
 
