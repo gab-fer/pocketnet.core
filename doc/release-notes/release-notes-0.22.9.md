@@ -48,14 +48,15 @@ Consensus
 General
 -------
 - Building fixes (openssl on macOS and GUI cmake build)
-
+- Allow to create new HD wallet from WIF key
+- Fix wallet import from legacy versions
 
 Low-level RPC changes
 ---------------------
-- RPC method `getapps` extend next named arguments: `address` for filter by author address and `id` for filter by unique identificator.
-- Fix `gettransactions` and `getrawtransaction` in public RPC - include payload data.
-- Extend `getalljury` with pagination arguments.
-
+- RPC method `getapps` extend next named arguments: `address` for filter by author address and `id` for filter by unique identificator
+- Fix `gettransactions` and `getrawtransaction` in public RPC - include payload data
+- Extend `getalljury` with pagination arguments
+- Fix `getwalletinfo` command (fix progress calculation)
 
 0.22.9 change log
 =================
@@ -67,5 +68,6 @@ Credits
 Thanks to everyone who directly contributed to this release:
 
 - Andy Oknen
+- HiHat
 
 As well as to everyone that helped with translations on [Transifex](https://www.transifex.com/pocketnetteam/pocketnet-core/).
