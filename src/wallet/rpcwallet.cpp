@@ -146,6 +146,27 @@ LegacyScriptPubKeyMan& EnsureLegacyScriptPubKeyMan(CWallet& wallet, bool also_cr
     return *spk_man;
 }
 
+std::shared_ptr<CWallet> _createwallet(const JSONRPCRequest& request, const std::string& walletName)
+{
+    uint64_t flags = 0;
+    flags |= WALLET_FLAG_BLANK_WALLET;
+
+    WalletContext& context = EnsureWalletContext(request.context);
+    DatabaseOptions options;
+    DatabaseStatus status;
+    options.require_create = true;
+    options.create_flags = flags;
+    bilingual_str error;
+    std::vector<bilingual_str> warnings;
+    std::shared_ptr<CWallet> wallet = CreateWallet(*context.chain, walletName, true, options, status, error, warnings);
+
+    if (!wallet) {
+        throw JSONRPCError(RPC_WALLET_ERROR, "Failed to create wallet: " + error.translated);
+    }
+
+    return wallet;
+}
+
 static void WalletTxToJSON(interfaces::Chain& chain, const CWalletTx& wtx, UniValue& entry)
 {
     int confirms = wtx.GetDepthInMainChain();
@@ -2665,7 +2686,7 @@ static RPCHelpMan getwalletinfo()
     if (pwallet->IsScanning()) {
         UniValue scanning(UniValue::VOBJ);
         scanning.pushKV("duration", pwallet->ScanningDuration() / 1000);
-        scanning.pushKV("progress", pwallet->ScanningProgress() / 100);
+        scanning.pushKV("progress", pwallet->ScanningProgress() * 100);
         obj.pushKV("scanning", scanning);
     } else {
         obj.pushKV("scanning", false);
@@ -4425,6 +4446,95 @@ static RPCHelpMan sethdseed()
     };
 }
 
+static CKey gethdseedfromdump(const std::string& filename)
+{
+    fsbridge::ifstream file;
+    file.open(filename, std::ios::in | std::ios::ate);
+    if (!file.is_open()) {
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open wallet dump file");
+    }
+
+    file.seekg(0, file.beg);
+
+    CKey key;
+    while (file.good()) {
+        std::string line;
+        std::getline(file, line);
+        if (line.empty() || line[0] == '#')
+            continue;
+
+        std::vector<std::string> vstr;
+        boost::split(vstr, line, boost::is_any_of(" "));
+        if (vstr.size() < 2)
+            continue;
+        key = DecodeSecret(vstr[0]);
+        if (key.IsValid()) {
+            if (vstr[2] == "hdseed=1")
+                break;
+        }
+    }
+    file.close();
+
+    return key;
+}
+
+static RPCHelpMan sethdseedfromdump()
+{
+    return RPCHelpMan{"sethdseedfromdump",
+            "\nImport HDSEED from dump text file. New wallet created automaticaly",
+            {
+                {"filename", RPCArg::Type::STR, RPCArg::Optional::NO, "The wallet file"},
+                {"walletname", RPCArg::Type::STR, RPCArg::Optional::NO, "The wallet name"},
+            },
+            RPCResult{RPCResult::Type::NONE, "", ""},
+            RPCExamples{
+                HelpExampleCli("sethdseedfromdump", "\"/path/to/the/file\" \"name\"")
+            },
+        [&](const RPCHelpMan& self, const JSONRPCRequest& request) -> UniValue
+{
+    std::string walletName = "";
+    if (request.params.size() > 1) {
+        walletName = request.params[1].get_str();
+    }
+
+    // Check existing wallets
+    std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
+    for (const auto& wallet : wallets) {
+        if (wallet->GetName() == walletName) {
+            throw JSONRPCError(RPC_WALLET_ERROR, "Wallet with name " + walletName + " already exists");
+        }
+    }
+
+    // Get HDSEED from file
+    CKey key = gethdseedfromdump(request.params[0].get_str());
+    if (!key.IsValid()) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "HDSEED not found");
+    }
+
+    // Create new wallet
+    std::shared_ptr<CWallet> wallet = _createwallet(request, walletName);
+    CWallet* const pwallet = wallet.get();
+
+    // Set HDSEED
+    LegacyScriptPubKeyMan& spk_man = EnsureLegacyScriptPubKeyMan(*pwallet, true);
+
+    LOCK2(pwallet->cs_wallet, spk_man.cs_KeyStore);
+
+    EnsureWalletIsUnlocked(pwallet);
+
+    if (HaveKey(spk_man, key)) {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Already have this key (either as an HD seed or as a loose private key)");
+    }
+
+    CPubKey master_pub_key = spk_man.DeriveNewSeed(key);
+    spk_man.SetHDSeed(master_pub_key);
+    wallet->TopUpKeyPool();
+
+    return NullUniValue;
+},
+    };
+}
+
 static RPCHelpMan gethdseed()
 {
     return RPCHelpMan{"gethdseed",
@@ -5077,6 +5187,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "sendmany",                         &sendmany,                      {"dummy","amounts","minconf","comment","subtractfeefrom","replaceable","conf_target","estimate_mode","fee_rate","verbose"} },
     { "wallet",             "sendtoaddress",                    &sendtoaddress,                 {"address","amount","comment","comment_to","subtractfeefromamount","replaceable","conf_target","estimate_mode","avoid_reuse","fee_rate","verbose","destaddress"} },
     { "wallet",             "sethdseed",                        &sethdseed,                     {"newkeypool","seed"} },
+    { "wallet",             "sethdseedfromdump",                &sethdseedfromdump,             {"filename","walletname"} },
     { "wallet",             "gethdseed",                        &gethdseed,                     {} },
     { "wallet",             "setlabel",                         &setlabel,                      {"address","label"} },
     { "wallet",             "settxfee",                         &settxfee,                      {"amount"} },
