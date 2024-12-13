@@ -42,10 +42,6 @@ namespace PocketConsensus
             if (ConsensusRepoInst.Exists_S1S2T(*ptx->GetAddress(), *ptx->GetJuryId(), { MODERATION_VOTE }))
                 return {false, ConsensusResult_Duplicate};
 
-            // The jury must be exists
-            if (!ConsensusRepoInst.ExistsJury(*ptx->GetJuryId())) // TODO (aok): check active jury disabled - changed to ExistsJury
-                return {false, ConsensusResult_NotFound};
-
             // The moderators' votes should be accepted with a delay, in case the jury gets into the orphan block
             auto juryFlag = ConsensusRepoInst.Get(*ptx->GetJuryId());
             if (!juryFlag || *juryFlag->GetType() != MODERATION_FLAG
