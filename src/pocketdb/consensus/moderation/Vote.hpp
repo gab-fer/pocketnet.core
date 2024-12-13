@@ -97,6 +97,10 @@ namespace PocketConsensus
             if (ConsensusRepoInst.Exists_MS1S2T(*ptx->GetAddress(), *ptx->GetJuryId(), { MODERATION_VOTE }))
                 return {false, ConsensusResult_Duplicate};
 
+            // The jury must be exists
+            if (!ConsensusRepoInst.ExistsActiveJury(*ptx->GetJuryId()))
+                return {false, ConsensusResult_NotFound};
+
             return Success;
         }
     };
