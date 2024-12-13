@@ -118,7 +118,7 @@ Changes:
 ## `PIP 110`: Lottery reward for moderation votes
 
 Fork start at:
-- Main net: 3291900
+- Main net: 9999999
 - Test net: 3500000
 
 Changes:
