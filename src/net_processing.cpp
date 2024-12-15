@@ -29,11 +29,14 @@
 #include <util/check.h> // For NDEBUG compile time check
 #include <util/strencodings.h>
 #include <util/system.h>
+#include <util/trace.h>
 #include <validation.h>
 #include <memory>
 #include <typeinfo>
 
 #include "pocketdb/services/Accessor.h"
+
+TRACEPOINT_SEMAPHORE(net, inbound_message);
 
 /** Expiration time for orphan transactions in seconds */
 static constexpr int64_t ORPHAN_TX_EXPIRE_TIME = 20 * 60;
@@ -4208,6 +4211,15 @@ bool PeerManager::ProcessMessages(CNode* pfrom, std::atomic<bool>& interruptMsgP
         fMoreWork = !pfrom->vProcessMsg.empty();
     }
     CNetMessage& msg(msgs.front());
+
+    TRACEPOINT(net, inbound_message,
+        pfrom->GetId(),
+        pfrom->GetAddrName().c_str(),
+        pfrom->ConnectionTypeAsString().c_str(),
+        msg.m_command.c_str(),
+        msg.m_recv.size(),
+        msg.m_recv.data()
+    );
 
     if (gArgs.GetBoolArg("-capturemessages", false)) {
         CaptureMessage(pfrom->addr, msg.m_command, MakeUCharSpan(msg.m_recv), /* incoming */ true);

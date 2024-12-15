@@ -23,6 +23,7 @@
 #include <scheduler.h>
 #include <util/sock.h>
 #include <util/strencodings.h>
+#include <util/trace.h>
 #include <util/translation.h>
 #include <util/time.h>
 
@@ -54,6 +55,8 @@ static_assert(MINIUPNPC_API_VERSION >= 10, "miniUPnPc API version >= 10 assumed"
 #include <unordered_map>
 
 #include <math.h>
+
+TRACEPOINT_SEMAPHORE(net, outbound_message);
 
 /** Maximum number of block-relay-only anchor connections */
 static constexpr size_t MAX_BLOCK_RELAY_ONLY_ANCHORS = 2;
@@ -3151,6 +3154,15 @@ void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
     if (gArgs.GetBoolArg("-capturemessages", false)) {
         CaptureMessage(pnode->addr, msg.m_type, msg.data, /* incoming */ false);
     }
+
+    TRACEPOINT(net, outbound_message,
+        pnode->GetId(),
+        pnode->GetAddrName().c_str(),
+        pnode->ConnectionTypeAsString().c_str(),
+        msg.m_type.c_str(),
+        msg.data.size(),
+        msg.data.data()
+    );
 
     // make sure we use the appropriate network transport format
     std::vector<unsigned char> serializedHeader;
