@@ -756,6 +756,17 @@ class PocketcoinTestFramework(metaclass=PocketcoinTestMetaClass):
         for i in range(self.num_nodes):
             initialize_datadir(self.options.tmpdir, i, self.chain)
 
+    def skip_if_no_pocketcoind_tracepoints(self):
+        """Skip the running test if bitcoind has not been compiled with USDT tracepoint support."""
+        if not self.is_usdt_compiled():
+            raise SkipTest("bitcoind has not been built with USDT tracepoints enabled.")
+
+    def skip_if_no_bpf_permissions(self):
+        """Skip the running test if we don't have permissions to do BPF syscalls and load BPF maps."""
+        # check for 'root' permissions
+        if os.geteuid() != 0:
+            raise SkipTest("no permissions to use BPF (please review the tests carefully before running them with higher privileges)")
+
     def skip_if_no_py3_zmq(self):
         """Attempt to import the zmq package and skip the test if the import fails."""
         try:
@@ -814,6 +825,10 @@ class PocketcoinTestFramework(metaclass=PocketcoinTestMetaClass):
     def is_wallet_tool_compiled(self):
         """Checks whether pocketcoin-wallet was compiled."""
         return self.config["components"].getboolean("ENABLE_WALLET_TOOL")
+
+    def is_usdt_compiled(self):
+        """Checks whether the USDT tracepoints were compiled."""
+        return self.config["components"].getboolean("ENABLE_USDT_TRACEPOINTS")
 
     def is_zmq_compiled(self):
         """Checks whether the zmq module was compiled."""

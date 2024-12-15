@@ -62,6 +62,8 @@
 #include "pocketdb/consensus/Helper.h"
 
 TRACEPOINT_SEMAPHORE(validation, block_connected);
+TRACEPOINT_SEMAPHORE(mempool, replaced);
+TRACEPOINT_SEMAPHORE(mempool, rejected);
 
 std::unordered_map<std::string, int> pocketProcessed;
 
@@ -1078,6 +1080,15 @@ bool MemPoolAccept::Finalize(ATMPArgs& args, Workspace& ws)
                 hash.ToString(),
                 FormatMoney(nModifiedFees - nConflictingFees),
                 (int)entry->GetTxSize() - (int)nConflictingSize);
+        TRACEPOINT(mempool, replaced,
+                it->GetTx().GetHash().data(),
+                it->GetTxSize(),
+                it->GetFee(),
+                std::chrono::duration_cast<std::chrono::duration<std::uint64_t>>(it->GetTime()).count(),
+                hash.data(),
+                entry->GetTxSize(),
+                entry->GetFee()
+        );
 
         if (args.m_replaced_transactions)
             args.m_replaced_transactions->push_back(it->GetSharedTx());
@@ -1164,6 +1175,10 @@ static bool AcceptToMemoryPoolWithTime(const CChainParams& chainparams, CTxMemPo
 
         for (const COutPoint& hashTx : coins_to_uncache)
             ::ChainstateActive().CoinsTip().Uncache(hashTx);
+        TRACEPOINT(mempool, rejected,
+                tx->GetHash().data(),
+                "reject reason not implemented yet"
+        );
     }
     // After we've (potentially) uncached entries, ensure our coins cache is still within its size limits
     BlockValidationState state_dummy;
