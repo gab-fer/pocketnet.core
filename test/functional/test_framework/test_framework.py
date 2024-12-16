@@ -756,16 +756,33 @@ class PocketcoinTestFramework(metaclass=PocketcoinTestMetaClass):
         for i in range(self.num_nodes):
             initialize_datadir(self.options.tmpdir, i, self.chain)
 
+    def skip_if_no_python_bcc(self):
+        """Attempt to import the bcc package and skip the tests if the import fails."""
+        try:
+            import bcc  # type: ignore[import] # noqa: F401
+        except ImportError:
+            raise SkipTest("bcc python module not available")
+
     def skip_if_no_pocketcoind_tracepoints(self):
-        """Skip the running test if bitcoind has not been compiled with USDT tracepoint support."""
+        """Skip the running test if pocketcoind has not been compiled with USDT tracepoint support."""
         if not self.is_usdt_compiled():
-            raise SkipTest("bitcoind has not been built with USDT tracepoints enabled.")
+            raise SkipTest("pocketcoind has not been built with USDT tracepoints enabled.")
 
     def skip_if_no_bpf_permissions(self):
         """Skip the running test if we don't have permissions to do BPF syscalls and load BPF maps."""
         # check for 'root' permissions
         if os.geteuid() != 0:
             raise SkipTest("no permissions to use BPF (please review the tests carefully before running them with higher privileges)")
+
+    def skip_if_platform_not_linux(self):
+        """Skip the running test if we are not on a Linux platform"""
+        if platform.system() != "Linux":
+            raise SkipTest("not on a Linux system")
+
+    def skip_if_platform_not_posix(self):
+        """Skip the running test if we are not on a POSIX platform"""
+        if os.name != 'posix':
+            raise SkipTest("not on a POSIX system")
 
     def skip_if_no_py3_zmq(self):
         """Attempt to import the zmq package and skip the test if the import fails."""

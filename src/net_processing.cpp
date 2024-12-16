@@ -37,6 +37,7 @@
 #include "pocketdb/services/Accessor.h"
 
 TRACEPOINT_SEMAPHORE(net, inbound_message);
+TRACEPOINT_SEMAPHORE(net, misbehaving_connection);
 
 /** Expiration time for orphan transactions in seconds */
 static constexpr int64_t ORPHAN_TX_EXPIRE_TIME = 20 * 60;
@@ -1239,6 +1240,10 @@ void PeerManager::Misbehaving(const NodeId pnode, const int howmuch, const std::
     if (peer->m_misbehavior_score >= DISCOURAGEMENT_THRESHOLD && peer->m_misbehavior_score - howmuch < DISCOURAGEMENT_THRESHOLD) {
         LogPrint(BCLog::NET, "Misbehaving: peer=%d (%d -> %d) DISCOURAGE THRESHOLD EXCEEDED%s\n", pnode,
             peer->m_misbehavior_score - howmuch, peer->m_misbehavior_score, message_prefixed);
+        TRACEPOINT(net, misbehaving_connection,
+            pnode,
+            message.c_str()
+        );
         peer->m_should_discourage = true;
     } else {
         LogPrint(BCLog::NET, "Misbehaving: peer=%d (%d -> %d)%s\n", pnode,
