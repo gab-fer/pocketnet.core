@@ -145,13 +145,12 @@ static const CRPCCommand commands[] =
     {"barteron",       "getbarteronoffersbyroottxhashes",  &GetBarteronOffersByRootTxHashes,{"hashes"}},
     {"barteron",       "getbarteronoffersbyaddress",       &GetBarteronOffersByAddress,     {"address"}},
     {"barteron",       "getbarteronfeed",                  &GetBarteronFeed,                {}},
-    // TODO (rpc): fixup params
+    {"barteron",       "getbarterongroups",                &GetBarteronGroups,              {}},
     {"barteron",       "getbarterondeals",                 &GetBarteronDeals,               {"hash"}},
     {"barteron",       "getbarteronoffersdetails",         &GetBarteronOffersDetails,       {"hash"}},
     {"barteron",       "getbarteroncomplexdeals",          &GetBarteronComplexDeals,        {"hash"}},
 
     // Apps
-    // TODO (rpc): fixup params
     {"apps",           "getapps",                          &GetApps,                        { }},
     {"apps",           "getappscores",                     &GetAppScores,                   { }},
     {"apps",           "getappcomments",                   &GetAppComments,                 { }},
