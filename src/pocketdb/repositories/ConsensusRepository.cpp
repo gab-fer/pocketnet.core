@@ -3738,53 +3738,94 @@ namespace PocketDb
         return result;
     }
 
-    int ConsensusRepository::CountModerationFlag(const string& address, const string& addressTo, bool includeMempool)
+    int ConsensusRepository::CountModerationFlag(const string& address, const string& addressTo, bool includeMempool, const int hight = 0, const int blockDepth = 0)
     {
         int result = 0;
         auto onlyChain = !includeMempool;
         string joinChain = onlyChain ? R"sql(
-            cross join Chain c on
-                c.TxId = t.RowId
-        )sql" : "";
-
-        SqlTransaction(__func__, [&]()
-        {
-            Sql(R"sql(
-                with
-                    str1 as (
-                        select
-                            r.RowId as id
-                        from
-                            Registry r
-                        where
-                            r.String = ?
-                    ),
-                    str3 as (
-                        select
-                            r.RowId as id
-                        from
-                            Registry r
-                        where
-                            r.String = ?
-                    )
-                select
-                    count()
-                from
-                    str1,
-                    str3,
-                    Transactions t indexed by Transactions_Type_RegId1_RegId3
-                    )sql" + joinChain + R"sql(
-                where
-                    t.Type = 410 and
-                    t.RegId1 = str1.id and
-                    t.RegId3 = str3.id
-            )sql")
-            .Bind(address, addressTo)
-            .Select([&](Cursor& cursor) {
-                if (cursor.Step())
-                    cursor.CollectAll(result);
+        cross join Chain c on
+            c.TxId = t.RowId
+            )sql" : "";
+        if (onlyChain && hight != 0 && blockDepth != 0) {
+            SqlTransaction(__func__, [&]() {
+                Sql(R"sql(
+            with
+                str1 as (
+                    select
+                        r.RowId as id
+                    from
+                        Registry r
+                    where
+                        r.String = ?
+                ),
+                str3 as (
+                    select
+                        r.RowId as id
+                    from
+                        Registry r
+                    where
+                        r.String = ?
+                )
+            select
+                count()
+            from
+                str1,
+                str3,
+                Transactions t indexed by Transactions_Type_RegId1_RegId3
+                )sql" +
+                    joinChain + R"sql(
+            where
+                t.Type = 410 and
+                t.RegId1 = str1.id and
+                t.RegId3 = str3.id and
+                and c.Height >= ?
+        )sql")
+                    .Bind(address, addressTo, hight - blockDepth)
+                    .Select([&](Cursor& cursor) {
+                        if (cursor.Step())
+                            cursor.CollectAll(result);
+                    });
             });
-        });
+        } else {
+            SqlTransaction(__func__, [&]() {
+                Sql(R"sql(
+            with
+                str1 as (
+                    select
+                        r.RowId as id
+                    from
+                        Registry r
+                    where
+                        r.String = ?
+                ),
+                str3 as (
+                    select
+                        r.RowId as id
+                    from
+                        Registry r
+                    where
+                        r.String = ?
+                )
+            select
+                count()
+            from
+                str1,
+                str3,
+                Transactions t indexed by Transactions_Type_RegId1_RegId3
+                )sql" +
+                    joinChain + R"sql(
+            where
+                t.Type = 410 and
+                t.RegId1 = str1.id and
+                t.RegId3 = str3.id
+        )sql")
+                    .Bind(address, addressTo)
+                    .Select([&](Cursor& cursor) {
+                        if (cursor.Step())
+                            cursor.CollectAll(result);
+                    });
+            });
+        }
 
         return result;
     }
