@@ -68,12 +68,7 @@ namespace PocketConsensus
         ConsensusValidateResult ValidateBlock(const ModerationFlagRef& ptx, const PocketBlockRef& block) override
         {
             // Check flag from one to one
-            int blockDepth = GetConsensusLimit(moderation_jury_flag_depth);
-            if (ConsensusRepoInst.CountModerationFlag(
-                    *ptx->GetAddress(),
-                    *ptx->GetContentAddressHash(),
-                    false,
-                    Height, blockDepth) > 0)
+            if (ConsensusRepoInst.CountModerationFlag(*ptx->GetAddress(), *ptx->GetContentAddressHash(), false) > 0)
                 return {false, ConsensusResult_Duplicate};
 
             // Count flags in chain
