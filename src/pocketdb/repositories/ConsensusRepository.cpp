@@ -3748,7 +3748,7 @@ namespace PocketDb
                 and c.Height >= ?
         )sql" : "";
 
-        SqlTransaction(__func__, [&]()
+        Stmt stmt = SqlTransaction(__func__, [&]()
         {
             Sql(R"sql(
                 with
@@ -3774,14 +3774,19 @@ namespace PocketDb
                     str1,
                     str3,
                     Transactions t indexed by Transactions_Type_RegId1_RegId3
-                    )sql" + joinChain + R"sql(
+                    )sql" +
+                joinChain + R"sql(
                 where
                     t.Type = 410 and
                     t.RegId1 = str1.id and
                     t.RegId3 = str3.id
             )sql")
-                .Bind(address, addressTo, hight - blockDepth)
-            .Select([&](Cursor& cursor) {
+                .Bind(address, addressTo);
+
+            if (onlyChain)
+                stmt.Bind(hight - blockDepth);
+
+            stmt.Select([&](Cursor& cursor) {
                 if (cursor.Step())
                     cursor.CollectAll(result);
             });
