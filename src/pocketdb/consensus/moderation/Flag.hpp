@@ -68,7 +68,7 @@ namespace PocketConsensus
         ConsensusValidateResult ValidateBlock(const ModerationFlagRef& ptx, const PocketBlockRef& block) override
         {
             // Check flag from one to one
-            if (ConsensusRepoInst.CountModerationFlag(*ptx->GetAddress(), *ptx->GetContentAddressHash(), false) > 0)
+            if (CountModerationFlagGreaterThanZero(ptx))
                 return {false, ConsensusResult_Duplicate};
 
             // Count flags in chain
@@ -125,6 +125,11 @@ namespace PocketConsensus
                 CONTENT_COMMENT, CONTENT_COMMENT_EDIT
             };
         }
+
+        virtual bool CountModerationFlagGreaterThanZero(const ModerationFlagRef& ptx)
+        {
+            return ConsensusRepoInst.CountModerationFlag(*ptx->GetAddress(), *ptx->GetContentAddressHash(), false) > 0;
+        }
     };
 
     class ModerationFlagConsensus_pip_109 : public ModerationFlagConsensus
@@ -148,39 +153,16 @@ namespace PocketConsensus
     {
     public:
         ModerationFlagConsensus_pip_112() : ModerationFlagConsensus_pip_109() {}
-
     protected:
-        ConsensusValidateResult ValidateBlock(const ModerationFlagRef& ptx, const PocketBlockRef& block) override
+        bool CountModerationFlagGreaterThanZero(const ModerationFlagRef& ptx) override
         {
-            // Check flag from one to one
             int blockDepth = GetConsensusLimit(moderation_jury_flag_depth);
-            if (ConsensusRepoInst.CountModerationFlag(
-                    *ptx->GetAddress(),
-                    *ptx->GetContentAddressHash(),
-                    false,
-                    Height, blockDepth) > 0)
-                return {false, ConsensusResult_Duplicate};
-
-            // Count flags in chain
-            int count = ConsensusRepoInst.CountModerationFlag(*ptx->GetAddress(), Height - (int)GetConsensusLimit(ConsensusLimit_depth), false);
-
-            // Count flags in block
-            for (auto& blockTx : *block) {
-                if (!TransactionHelper::IsIn(*blockTx->GetType(), {MODERATION_FLAG}) || *blockTx->GetHash() == *ptx->GetHash())
-                    continue;
-
-                auto blockPtx = static_pointer_cast<ModerationFlag>(blockTx);
-                if (*ptx->GetAddress() == *blockPtx->GetAddress()) {
-                    if (*ptx->GetContentTxHash() == *blockPtx->GetContentTxHash())
-                        return {false, ConsensusResult_Duplicate};
-                    else
-                        count += 1;
-                }
-            }
-
-            // Check limit
-            return SocialConsensus::ValidateLimit(moderation_flag_count, count);
-        }s
+            return ConsensusRepoInst.CountModerationFlag(
+                       *ptx->GetAddress(),
+                       *ptx->GetContentAddressHash(),
+                       false,
+                       Height, blockDepth) > 0;
+        }
     };
 
     // Factory for select actual rules version
