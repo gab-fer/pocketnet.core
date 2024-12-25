@@ -515,7 +515,6 @@ POCKETCOIN_CORE_H = \
     util/system.h \
     util/threadnames.h \
     util/time.h \
-    util/trace.h \
     util/translation.h \
     util/ui_change_type.h \
     util/url.h \

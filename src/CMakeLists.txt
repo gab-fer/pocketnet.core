@@ -784,7 +784,6 @@ add_library(${POCKETCOIN_UTIL}
                 util/syserror.cpp
                 util/threadnames.cpp
                 util/threadnames.h
-                util/trace.h
                 util/translation.h
                 util/ui_change_type.h
                 util/url.cpp
