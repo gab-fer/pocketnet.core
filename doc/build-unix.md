@@ -48,7 +48,6 @@ Optional dependencies:
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
  univalue    | Utility          | JSON parsing and encoding (bundled version will be used unless --with-system-univalue passed to configure)
  libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.0.0)
- systemtap   | Tracing (USDT)   | Optional, statically defined tracepoints
 
 For the versions used, see [dependencies.md](dependencies.md)
 
@@ -96,10 +95,6 @@ ZMQ dependencies (provides ZMQ API):
 
     sudo apt-get install libzmq3-dev
 
-User-Space, Statically Defined Tracing (USDT) dependencies:
-
-    sudo apt install systemtap-sdt-dev
-
 #### Dependencies for the GUI
 
 If you want to build pocketcoin-qt, make sure that the required packages for Qt development
@@ -130,27 +125,13 @@ Optional:
 
     sudo dnf install miniupnpc-devel
 
-User-Space, Statically Defined Tracing (USDT) dependencies:
-
-    sudo dnf install systemtap
-
-
-GUI dependencies:
-
-If you want to build pocketcoin-qt, make sure that the required packages for Qt development
-are installed. Qt 5 is necessary to build the GUI.
-To build without GUI pass `--without-gui`.
-
 To build with Qt 5 you need the following:
 
-    sudo dnf install qt5-qttools-devel qt5-qtbase-devel
+    sudo dnf install qt5-qttools-devel qt5-qtbase-devel protobuf-devel
 
 libqrencode (optional) can be installed with:
 
     sudo dnf install qrencode-devel
-
-Once these are installed, they will be found by configure and a pocketcoin-qt executable will be
-built by default.
 
 Notes
 -----
