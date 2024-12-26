@@ -333,14 +333,11 @@ namespace PocketServices
         // Before reindex - clear all existing juries
         MigrationRepoInst.ClearAllJuries();
 
-        // Reindex all flags
-        auto flags = MigrationRepoInst.GetAllModTxs();
-        for (const auto&fl : flags)
+        // Reindex all modTxs
+        auto modTxs = MigrationRepoInst.GetAllModTxs();
+        for (const auto&[height, txs] : modTxs)
         {
-            int height = fl.first;
-            LogPrintf("Migrating moderation juries at height %d\n", height);
-
-            for (const auto&[hash, type] : fl.second)
+            for (const auto&[hash, type] : txs)
             {
                 if (type == 410)
                 {

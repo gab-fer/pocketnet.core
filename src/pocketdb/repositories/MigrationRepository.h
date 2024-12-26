@@ -22,7 +22,7 @@ namespace PocketDb
     {
     public:
         explicit MigrationRepository(SQLiteDatabase& db, bool timeouted) : BaseRepository(db, timeouted) {}
-        map<int, vector<tuple<string, int>>> GetAllModTxs();
+        vector<tuple<int, vector<tuple<string, int>>>> GetAllModTxs();
         void ClearAllJuries();
         int LikersByFlag(const string& txHash, int height);
         int LikersByVote(const string& txHash, int height);

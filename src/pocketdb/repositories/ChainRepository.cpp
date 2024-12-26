@@ -955,12 +955,13 @@ namespace PocketDb
                     -- if there are X flags of the same reason for X time
                     and ? <= (
                         select count()
-                        from Transactions ff indexed by Transactions_Type_RegId3_RegId1
+                        from Transactions ff
                         cross join Chain cff
                             on cff.TxId = ff.RowId and cff.Height > ?
                         where
                             ff.Type in (410) and
-                            ff.RegId3 = f.RegId3
+                            ff.RegId3 = f.RegId3 and
+                            ff.Int1 = f.Int1
                     )
             )sql")
             .Bind(flagTxHash, flagsMinCount, flagsDepth)

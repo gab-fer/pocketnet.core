@@ -8,9 +8,9 @@
 
 namespace PocketDb
 {
-    map<int, vector<tuple<string, int>>> MigrationRepository::GetAllModTxs()
+    vector<tuple<int, vector<tuple<string, int>>>> MigrationRepository::GetAllModTxs()
     {
-        map<int, vector<tuple<string, int>>> result;
+        vector<tuple<int, vector<tuple<string, int>>>> result;
         Sql(R"sql(
             select c.Height, r.String, f.Type, BlockNum
             from Transactions f
@@ -26,9 +26,7 @@ namespace PocketDb
                 string hash;
                 int type;
                 if (cursor.CollectAll(height, hash, type)){
-                    if (result.find(height) == result.end())
-                        result[height] = vector<tuple<string, int>>();
-                    result[height].emplace_back(hash, type);
+                    result.emplace_back(height, vector<tuple<string, int>>{make_tuple(hash, type)});
                 }
             }
         });
@@ -193,7 +191,7 @@ namespace PocketDb
                     First fu on
                         fu.TxId = u.RowId
             )sql")
-            .Bind(txHash)
+            .Bind(txHash, height, height, height)
             .Select([&](Cursor& cursor) {
                 if (cursor.Step())
                     cursor.CollectAll(result);
@@ -256,12 +254,13 @@ namespace PocketDb
                     -- if there are X flags of the same reason for X time
                     and ? <= (
                         select count()
-                        from Transactions ff indexed by Transactions_Type_RegId3_RegId1
+                        from Transactions ff
                         cross join Chain cff
                             on cff.TxId = ff.RowId and cff.Height > ? and cff.Height <= ?
                         where
                             ff.Type in (410) and
-                            ff.RegId3 = f.RegId3
+                            ff.RegId3 = f.RegId3 and
+                            ff.Int1 = f.Int1
                     )
             )sql")
             .Bind(flagTxHash, flagsMinCount, flagsDepth, topHeight)
@@ -292,7 +291,7 @@ namespace PocketDb
                     select b.AccountId, (select r.String from Registry r where r.RowId = u.TxId) as Hash
                     from Badges b indexed by Badges_Badge_Cancel_AccountId_Height
                     cross join Chain u on u.Uid = b.AccountId and exists (select 1 from First f where f.TxId = u.TxId)
-                    where b.Badge = 3 and b.Cancel=0 and b.AccountId=u.Uid and b.Height <= ? and
+                    where b.Badge = 3 and b.Cancel=0 and b.AccountId=u.Uid and b.Height < ? and
                         not exists (
                             select
                                 1
@@ -303,7 +302,7 @@ namespace PocketDb
                                 bb.Cancel = 1 and
                                 bb.AccountId = b.AccountId and
                                 bb.Height > b.Height and
-                                bb.Height <= ?
+                                bb.Height < ?
                         )
                   ),
                   l as (

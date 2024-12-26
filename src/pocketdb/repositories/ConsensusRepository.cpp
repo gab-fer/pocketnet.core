@@ -3855,7 +3855,7 @@ namespace PocketDb
                 with
                     flag as ( select r.RowId from Registry r where r.String = ? )
                 select
-                    ifnull(sum(lp.Value),0)LikersAll
+                    sum(ifnull(lp.Value,0))LikersAll
                 from
                     flag
                 cross join
@@ -3894,7 +3894,7 @@ namespace PocketDb
                 with
                     vote as ( select r.RowId from Registry r where r.String = ? )
                 select
-                    ifnull(sum(lp.Value),0)LikersAll
+                    sum(ifnull(lp.Value,0))LikersAll
                 from
                     vote
                 cross join
