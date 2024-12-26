@@ -1613,11 +1613,12 @@ static RPCHelpMan listtransactions()
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Negative from");
 
     UniValue ret(UniValue::VARR);
-
+    UniValue result{UniValue::VOBJ};
     {
         LOCK(pwallet->cs_wallet);
 
         const CWallet::TxItems & txOrdered = pwallet->wtxOrdered;
+        result.pushKV("total", txOrdered.size());
 
         // iterate backwards until we have nCount items to return:
         for (CWallet::TxItems::const_reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
@@ -1636,8 +1637,10 @@ static RPCHelpMan listtransactions()
         nCount = ret.size() - nFrom;
 
     const std::vector<UniValue>& txs = ret.getValues();
-    UniValue result{UniValue::VARR};
-    result.push_backV({ txs.rend() - nFrom - nCount, txs.rend() - nFrom }); // Return oldest to newest
+    UniValue txsArray{UniValue::VARR};
+    txsArray.push_backV({ txs.rend() - nFrom - nCount, txs.rend() - nFrom }); // Return oldest to newest
+    result.pushKV("txs", txsArray);
+    
     return result;
 },
     };

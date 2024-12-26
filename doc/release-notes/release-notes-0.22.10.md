@@ -47,6 +47,7 @@ General
 RPC changes
 ---------------------
 - Added `getaccountversions` method to get account versions
+- Modified `listtransactions` method to return total number of transactions
 
 0.22.10 change log
 =================
