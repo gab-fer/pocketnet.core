@@ -86,6 +86,7 @@ static const CRPCCommand commands[] =
 
     // Accounts
     {"accounts",        "getuserprofile",                   &GetAccountProfiles,             {"addresses", "short"}},
+    {"accounts",        "getaccountversions",               &GetAccountVersions,             {"address", "topHeight", "pageStart", "pageSize"}},
     {"accounts",        "getuseraddress",                   &GetAccountAddress,              {"name"}},
     {"accounts",        "getaddressregistration",           &GetAccountRegistration,         {"addresses"}},
     {"accounts",        "getuserstate",                     &GetAccountState,                {"address"}},
