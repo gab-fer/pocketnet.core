@@ -3738,19 +3738,19 @@ namespace PocketDb
         return result;
     }
 
-    int ConsensusRepository::CountModerationFlag(const string& address, const string& addressTo, bool includeMempool, const int hight = 0, const int blockDepth = 0)
+    int ConsensusRepository::CountModerationFlag(const string& address, const string& addressTo, bool includeMempool, int height, int blockDepth)
     {
         int result = 0;
         auto onlyChain = !includeMempool;
         string joinChain = onlyChain ? R"sql(
             cross join Chain c on
-                c.TxId = t.RowId
-                and c.Height >= ?
+                c.TxId = t.RowId and
+                c.Height >= ?
         )sql" : "";
 
-        Stmt stmt = SqlTransaction(__func__, [&]()
+        SqlTransaction(__func__, [&]()
         {
-            Sql(R"sql(
+            auto& stmt = Sql(R"sql(
                 with
                     str1 as (
                         select
@@ -3780,11 +3780,12 @@ namespace PocketDb
                     t.Type = 410 and
                     t.RegId1 = str1.id and
                     t.RegId3 = str3.id
-            )sql")
-                .Bind(address, addressTo);
+            )sql");
+
+            stmt.Bind(address, addressTo);
 
             if (onlyChain)
-                stmt.Bind(hight - blockDepth);
+                stmt.Bind(height - blockDepth);
 
             stmt.Select([&](Cursor& cursor) {
                 if (cursor.Step())
