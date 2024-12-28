@@ -337,12 +337,6 @@ namespace PocketServices
         auto modTxs = MigrationRepoInst.GetAllModTxs();
         for (const auto&[height, txs] : modTxs)
         {
-            LogPrintf("Migrating moderation juries at height %d\n", height);
-            if (height == 3068486)
-            {
-                LogPrintf("Migrating moderation juries at height %d\n", height);
-            }
-
             for (const auto&[hash, type] : txs)
             {
                 if (type == 410)
