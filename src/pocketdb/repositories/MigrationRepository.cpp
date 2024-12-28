@@ -348,12 +348,13 @@ namespace PocketDb
                             vv.Int1 = 0 -- Negative verdict
                     cross join
                         Chain c on
-                            c.TxId = vv.RowId
+                            c.TxId = vv.RowId and
+                            c.Height <= ?
                 where
                     v.RowId = (select r.RowId from Registry r where r.String = ?) and
                     not exists (select 1 from JuryVerdict jv where jv.FlagRowId = f.RowId)
             )sql")
-            .Bind(voteTxHash)
+            .Bind(topHeight, voteTxHash)
             .Run();
             
             Sql(R"sql(
