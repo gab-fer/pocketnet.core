@@ -1618,7 +1618,7 @@ static RPCHelpMan listtransactions()
         LOCK(pwallet->cs_wallet);
 
         const CWallet::TxItems & txOrdered = pwallet->wtxOrdered;
-        result.pushKV("total", txOrdered.size());
+        result.pushKV("total", (int)txOrdered.size());
 
         // iterate backwards until we have nCount items to return:
         for (CWallet::TxItems::const_reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
