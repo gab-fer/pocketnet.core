@@ -473,8 +473,15 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
 
         if (packageFees < minFee)
         {
-            // Everything else we might consider has a lower fee rate
-            return;
+            LogPrintf("tx - %s, fee - %s, minFee - %s\n", iter->GetTx().GetHash().GetHex(), packageFees, minFee);
+
+            if (fUsingModified)
+            {
+                mapModifiedTx.get<ancestor_score>().erase(modit);
+                failedTx.insert(iter);
+            }
+
+            continue;
         }
 
         CTransactionRef tx = iter->GetSharedTx();
@@ -570,6 +577,10 @@ void BlockAssembler::addPackageTxs(int& nPackagesSelected, int& nDescendantsUpda
 
         // Update transactions that depend on each of these
         nDescendantsUpdated += UpdatePackagesForAdded(ancestors, mapModifiedTx);
+
+        // Set maximum number of transactions in block
+        if (nPackagesSelected > 1500)
+            break;
     }
 }
 
