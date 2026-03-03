@@ -135,7 +135,7 @@ namespace PocketWeb::PocketWebRpc
         return RPCHelpMan{"getbarteronfeed",
             "\nGet barteron offers feed.\n",
             {
-                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers" },
+                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers. May contain optional: \"state\" (array of status strings), \"depth\" (blockchain analysis depth, number)" },
             },
             RPCResult{ RPCResult::Type::ARR, "", "", {
                 { RPCResult::Type::STR_HEX, "hash", "Tx hash" },
@@ -174,6 +174,14 @@ namespace PocketWeb::PocketWebRpc
                     
                 if (auto arg = args.At("search", true); arg.isStr())
                     feedArgs.Search = arg.get_str();
+
+                if (auto arg = args.At("state", true); arg.isArray())
+                    for (size_t i = 0; i < arg.size(); i++)
+                        if (arg[i].isStr())
+                            feedArgs.State.push_back(arg[i].get_str());
+
+                if (auto arg = args.At("depth", true); arg.isNum())
+                    feedArgs.Depth = arg.get_int();
             }
 
             auto hashes = request.DbConnection()->BarteronRepoInst->GetFeed(feedArgs);
@@ -195,7 +203,7 @@ namespace PocketWeb::PocketWebRpc
         return RPCHelpMan{"getbarterongroups",
             "\nGet barteron groups feed.\n",
             {
-                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter groups" },
+                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter groups. May contain optional: \"state\" (array of status strings), \"depth\" (blockchain analysis depth, number)" },
             },
             RPCResult{ RPCResult::Type::ARR, "", "", {
                 { RPCResult::Type::STR_HEX, "hash", "Tx hash" },
@@ -237,6 +245,14 @@ namespace PocketWeb::PocketWebRpc
                     
                 if (auto arg = args.At("search", true); arg.isStr())
                     feedArgs.Search = arg.get_str();
+
+                if (auto arg = args.At("state", true); arg.isArray())
+                    for (size_t i = 0; i < arg.size(); i++)
+                        if (arg[i].isStr())
+                            feedArgs.State.push_back(arg[i].get_str());
+
+                if (auto arg = args.At("depth", true); arg.isNum())
+                    feedArgs.Depth = arg.get_int();
             }
 
             return request.DbConnection()->BarteronRepoInst->GetGroups(feedArgs);
@@ -248,7 +264,7 @@ namespace PocketWeb::PocketWebRpc
         return RPCHelpMan{"getbarterondeals",
             "\nGet barteron offers feed.\n",
             {
-                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers" },
+                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers. May contain optional: \"state\" (array of status strings), \"depth\" (blockchain analysis depth, number)" },
             },
             RPCResult{ RPCResult::Type::ARR, "", "", {
                 { RPCResult::Type::STR_HEX, "hash", "Tx hash" },
@@ -298,6 +314,14 @@ namespace PocketWeb::PocketWebRpc
 
                 if (auto arg = _args.At("lang", true); arg.isStr())
                     args.Language = arg.get_str();
+
+                if (auto arg = _args.At("state", true); arg.isArray())
+                    for (size_t i = 0; i < arg.size(); i++)
+                        if (arg[i].isStr())
+                            args.State.push_back(arg[i].get_str());
+
+                if (auto arg = _args.At("depth", true); arg.isNum())
+                    args.Depth = arg.get_int();
             }
 
             auto hashes = request.DbConnection()->BarteronRepoInst->GetDeals(args);
@@ -408,7 +432,7 @@ namespace PocketWeb::PocketWebRpc
         return RPCHelpMan{"getbarteroncomplexdeals",
             "\nGet barteron complex (3-side deals).\n",
             {
-                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers" },
+                { "request", RPCArg::Type::STR, RPCArg::Optional::NO, "JSON object for filter offers. May contain optional: \"state\" (array of status strings), \"depth\" (blockchain analysis depth, number)" },
             },
             RPCResult{ RPCResult::Type::ARR, "", "", {
                 { RPCResult::Type::STR_HEX, "hash", "Tx hash" },
@@ -444,6 +468,14 @@ namespace PocketWeb::PocketWebRpc
 
                 if (auto arg = _args.At("lang", true); arg.isStr())
                     args.Language = arg.get_str();
+
+                if (auto arg = _args.At("state", true); arg.isArray())
+                    for (size_t i = 0; i < arg.size(); i++)
+                        if (arg[i].isStr())
+                            args.State.push_back(arg[i].get_str());
+
+                if (auto arg = _args.At("depth", true); arg.isNum())
+                    args.Depth = arg.get_int();
 
                 if (args.MyTag == 0 || args.TheirTags.empty()) {
                     // TODO (losty): error

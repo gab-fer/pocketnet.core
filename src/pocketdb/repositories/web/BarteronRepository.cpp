@@ -202,6 +202,11 @@ namespace PocketDb
             _location.push_back(t + "%");
         string location = _location.write();
 
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+
         string orderBy = " ct.Height ";
         if (args.Page.OrderBy == "location")
             orderBy = " pt.String6 ";
@@ -211,6 +216,10 @@ namespace PocketDb
             orderBy = " round(f.Rank, 0) ";
         if (args.Page.OrderDesc)
             orderBy += " desc ";
+
+        string stateFilter = args.State.empty() ? "" : " and (t.RegId3 is null or (select r.String from Registry r where r.RowId = t.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
 
         string sql = R"sql(
             with
@@ -233,7 +242,7 @@ namespace PocketDb
                     t.Type in (211, 212)
             cross join
                 Chain ct indexed by Chain_TxId_Height
-                    on ct.TxId = t.RowId and ct.Height <= ?
+                    on ct.TxId = t.RowId and ct.Height <= ? and ct.Height >= ?
             cross join
                 Last lt
                     on lt.TxId = t.RowId
@@ -268,6 +277,7 @@ namespace PocketDb
 
             where
                 f.Value match ?
+                )sql" + stateFilter + R"sql(
 
             order by
                     )sql" + orderBy + R"sql(
@@ -278,17 +288,33 @@ namespace PocketDb
         SqlTransaction(
             __func__,
             [&]() -> Stmt& {
-                return Sql(sql).Bind(
-                    args.Language,
-                    tags,
-                    location,
-                    args.PriceMax,
-                    args.PriceMin,
-                    args.Page.TopHeight,
-                    keyword,
-                    args.Page.PageSize,
-                    args.Page.PageStart * args.Page.PageSize
-                );
+                if (args.State.empty())
+                    return Sql(sql).Bind(
+                        args.Language,
+                        tags,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        keyword,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
+                else
+                    return Sql(sql).Bind(
+                        args.Language,
+                        tags,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        keyword,
+                        stateJson,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
             },
             [&] (Stmt& stmt) {
                 stmt.Select([&](Cursor& cursor) {
@@ -316,6 +342,11 @@ namespace PocketDb
             _location.push_back(t + "%");
         string location = _location.write();
 
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+
         string orderBy = " ct.Height ";
         if (args.Page.OrderBy == "location")
             orderBy = " pt.String6 ";
@@ -323,6 +354,10 @@ namespace PocketDb
             orderBy = " pt.Int1 ";
         if (args.Page.OrderDesc)
             orderBy += " desc ";
+
+        string stateFilter = args.State.empty() ? "" : " where (t.RegId3 is null or (select r.String from Registry r where r.RowId = t.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
 
         string sql = R"sql(
             with
@@ -340,7 +375,7 @@ namespace PocketDb
                     bo.Tag = tags.value
             cross join
                 Chain ct indexed by Chain_Uid_Height
-                    on bo.OfferId = ct.Uid and ct.Height <= ?
+                    on bo.OfferId = ct.Uid and ct.Height <= ? and ct.Height >= ?
             cross join
                 Transactions t indexed by Transactions_Type_RegId1_RegId2_RegId3 on
                     t.Type in (211, 212) and
@@ -372,6 +407,7 @@ namespace PocketDb
             cross join
                 Chain cu
                     on cu.TxId = u.RowId
+            )sql" + stateFilter + R"sql(
 
             order by
                 )sql" + orderBy + R"sql(
@@ -383,16 +419,31 @@ namespace PocketDb
         SqlTransaction(
             __func__,
             [&]() -> Stmt& {
-                return Sql(sql).Bind(
-                    args.Language,
-                    tags,
-                    location,
-                    args.PriceMax,
-                    args.PriceMin,
-                    args.Page.TopHeight,
-                    args.Page.PageSize,
-                    args.Page.PageStart * args.Page.PageSize
-                );
+                if (args.State.empty())
+                    return Sql(sql).Bind(
+                        args.Language,
+                        tags,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
+                else
+                    return Sql(sql).Bind(
+                        args.Language,
+                        tags,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        stateJson,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
             },
             [&] (Stmt& stmt) {
                 stmt.Select([&](Cursor& cursor) {
@@ -415,6 +466,11 @@ namespace PocketDb
             _location.push_back(t + "%");
         string location = _location.write();
 
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+
         string orderBy = " ct.Height ";
         if (args.Page.OrderBy == "location")
             orderBy = " pt.String6 ";
@@ -422,6 +478,10 @@ namespace PocketDb
             orderBy = " pt.Int1 ";
         if (args.Page.OrderDesc)
             orderBy += " desc ";
+
+        string stateFilter = args.State.empty() ? "" : " and (t.RegId3 is null or (select r.String from Registry r where r.RowId = t.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
 
         string sql = R"sql(
             with
@@ -435,7 +495,7 @@ namespace PocketDb
                 Transactions t indexed by Transactions_Type_RegId1_RegId2_RegId3
             cross join
                 Chain ct indexed by Chain_TxId_Height
-                    on ct.TxId = t.RowId and ct.Height <= ?
+                    on ct.TxId = t.RowId and ct.Height <= ? and ct.Height >= ?
             cross join
                 Last lt
                     on lt.TxId = t.RowId
@@ -466,6 +526,7 @@ namespace PocketDb
 
             where
                 t.Type in (211, 212)
+                )sql" + stateFilter + R"sql(
 
             order by
                 )sql" + orderBy + R"sql(
@@ -477,15 +538,29 @@ namespace PocketDb
         SqlTransaction(
             __func__,
             [&]() -> Stmt& {
-                return Sql(sql).Bind(
-                    args.Language,
-                    location,
-                    args.PriceMax,
-                    args.PriceMin,
-                    args.Page.TopHeight,
-                    args.Page.PageSize,
-                    args.Page.PageStart * args.Page.PageSize
-                );
+                if (args.State.empty())
+                    return Sql(sql).Bind(
+                        args.Language,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
+                else
+                    return Sql(sql).Bind(
+                        args.Language,
+                        location,
+                        args.PriceMax,
+                        args.PriceMin,
+                        args.Page.TopHeight,
+                        minHeight,
+                        stateJson,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
             },
             [&] (Stmt& stmt) {
                 stmt.Select([&](Cursor& cursor) {
@@ -518,6 +593,14 @@ namespace PocketDb
     {
         UniValue result(UniValue::VARR);
 
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+        string _stateFilter = args.State.empty() ? "" : " and (t.RegId3 is null or (select r.String from Registry r where r.RowId = t.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
+
         string _filters = "";
         if (!args.Language.empty()) _filters += " cross join lang on pt.String1 = lang.value ";
         if (args.PriceMax > 0) _filters += " cross join priceMax on pt.Int1 <= priceMax.value ";
@@ -525,23 +608,20 @@ namespace PocketDb
 
         string search = args.Search;
         boost::replace_all(search, "%", "");
+        string _searchCte = "";
+        string _searchFrom = "Transactions t indexed by Transactions_Type_RegId1_RegId2_RegId3";
         if (!search.empty())
         {
             search = "\"" + search + "\"" + " OR \"" + search + "\"*";
-
-            _filters += R"sql(
-                cross join (
-                    select fm.ContentId
-                    from
-                        web.Content f
-                    cross join
-                        web.ContentMap fm on
-                            fm.ROWID = f.ROWID
-                    where
-                        fm.FieldType in (12,13) and
-                        f.Value match ?
-                ) sc on sc.ContentId = t.RowId
+            _searchCte = R"sql(
+                search_ids as (
+                    select fm.ContentId as RowId
+                    from web.Content f
+                    cross join web.ContentMap fm on fm.ROWID = f.ROWID
+                    where fm.FieldType in (12,13) and f.Value match ?
+                ),
             )sql";
+            _searchFrom = "search_ids sr cross join Transactions t on t.RowId = sr.RowId";
         }
 
         string _tagsStr = "[]";
@@ -570,6 +650,7 @@ namespace PocketDb
             [&]() -> Stmt& {
                 auto& stmt =  Sql(R"sql(
                     with
+                    )sql" + _searchCte + R"sql(
                         lang as (select ? as value),
                         tags as (select value from json_each(?)),
                         location as (select value from json_each(?)),
@@ -579,13 +660,13 @@ namespace PocketDb
                         substr(pt.String6, 1, ?),
                         count(1)
                     from
-                        Transactions t indexed by Transactions_Type_RegId1_RegId2_RegId3
+                    )sql" + _searchFrom + R"sql(
                     cross join
                         Last lt
                             on lt.TxId = t.RowId
                     cross join
                         Chain ct indexed by Chain_TxId_Height
-                            on ct.TxId = t.RowId
+                            on ct.TxId = t.RowId and ct.Height <= ? and ct.Height >= ?
                     cross join
                         Payload pt
                             on pt.TxId = t.RowId
@@ -607,9 +688,13 @@ namespace PocketDb
                     )sql" + _filters + R"sql(
                     where
                         t.Type in (211, 212)
+                    )sql" + _stateFilter + R"sql(
                     group by
                         substr(pt.String6, 1, ?)
                 )sql");
+
+                if (!search.empty())
+                    stmt.Bind(search);
 
                 stmt.Bind(
                     args.Language,
@@ -620,9 +705,11 @@ namespace PocketDb
                     args.LocationGroup
                 );
 
-                if (!search.empty())
-                    stmt.Bind(search);
-                
+                stmt.Bind(args.Page.TopHeight, minHeight);
+
+                if (!args.State.empty())
+                    stmt.Bind(stateJson);
+
                 stmt.Bind(
                     args.LocationGroup
                 );
@@ -648,6 +735,14 @@ namespace PocketDb
     vector<string> BarteronRepository::GetDeals(const BarteronOffersDealDto& args)
     {
         vector<string> result;
+
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+        string _stateFilter = args.State.empty() ? "" : " and (to2.RegId3 is null or (select r2.String from Registry r2 where r2.RowId = to2.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
 
         string _orderBy = " co2.Height ";
         if (args.Page.OrderBy == "location")
@@ -738,7 +833,8 @@ namespace PocketDb
                         ( ? or po2.Int1 <= price.max ) and
                         ( ? or ru2.String in ( )sql" + join(vector<string>(args.Addresses.size(), "?"), ",") + R"sql( ) ) and
                         ( ? or ru2.String not in ( )sql" + join(vector<string>(args.ExcludeAddresses.size(), "?"), ",") + R"sql( ) ) and
-                        co2.Height <= ?
+                        co2.Height <= ? and co2.Height >= ?
+                        )sql" + _stateFilter + R"sql(
 
                     order by
                         )sql" + _orderBy + R"sql(
@@ -758,17 +854,33 @@ namespace PocketDb
                 if (!search.empty())
                     stmt.Bind(search);
 
-                stmt.Bind(
-                    (args.PriceMin < 0),
-                    (args.PriceMax < 0),
-                    args.Addresses.empty(),
-                    args.Addresses,
-                    args.ExcludeAddresses.empty(),
-                    args.ExcludeAddresses,
-                    args.Page.TopHeight,
-                    args.Page.PageSize,
-                    args.Page.PageStart * args.Page.PageSize
-                );
+                if (args.State.empty())
+                    stmt.Bind(
+                        (args.PriceMin < 0),
+                        (args.PriceMax < 0),
+                        args.Addresses.empty(),
+                        args.Addresses,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
+                else
+                    stmt.Bind(
+                        (args.PriceMin < 0),
+                        (args.PriceMax < 0),
+                        args.Addresses.empty(),
+                        args.Addresses,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses,
+                        args.Page.TopHeight,
+                        minHeight,
+                        stateJson,
+                        args.Page.PageSize,
+                        args.Page.PageStart * args.Page.PageSize
+                    );
 
                 return stmt;
             },
@@ -790,6 +902,14 @@ namespace PocketDb
     {
         map<string, vector<string>> result;
 
+        UniValue _state(UniValue::VARR);
+        for (const auto& s : args.State)
+            _state.push_back(s);
+        string stateJson = _state.write();
+        string _stateFilter = args.State.empty() ? "" : " where (tx1.RegId3 is null or (select r.String from Registry r where r.RowId = tx1.RegId3) in (select value from json_each(?))) and (tx2.RegId3 is null or (select r.String from Registry r where r.RowId = tx2.RegId3) in (select value from json_each(?)))"s;
+
+        int64_t minHeight = (args.Depth > 0 && args.Page.TopHeight > 0) ? (args.Page.TopHeight - args.Depth + 1) : 0;
+
         string _filters = "";
 
         string _locationStr = "[]";
@@ -807,7 +927,7 @@ namespace PocketDb
         SqlTransaction(
             __func__,
             [&]() -> Stmt& {
-                return Sql(
+                auto& stmt = Sql(
                     R"sql(
                         with
                             lang as (select ? as value),
@@ -833,7 +953,7 @@ namespace PocketDb
                                 t2.Tag = mytag.value
 
                             cross join Chain c1 on
-                                c1.Uid = o1.OfferId
+                                c1.Uid = o1.OfferId and c1.Height <= ? and c1.Height >= ?
                             cross join Last l1 on
                                 l1.TxId = c1.TxId
                             cross join Transactions tx1 on
@@ -843,7 +963,7 @@ namespace PocketDb
                                 p1.TxId = c1.TxId
 
                             cross join Chain c2 on
-                                c2.Uid = o2.OfferId
+                                c2.Uid = o2.OfferId and c2.Height <= ? and c2.Height >= ?
                             cross join Last l2 on
                                 l2.TxId = c2.TxId
                             cross join Transactions tx2 on
@@ -854,19 +974,41 @@ namespace PocketDb
                                 p2.TxId = c2.TxId
 
                             -- Filters
-                            )sql" + _filters + R"sql(
+                            )sql" + _filters + _stateFilter + R"sql(
                     )sql"
-                )
-                .Bind(
-                    args.Language,
-                    _locationStr,
-                    args.MyTag,
-                    args.TheirTags,
-                    args.ExcludeAddresses.empty(),
-                    args.ExcludeAddresses,
-                    args.ExcludeAddresses.empty(),
-                    args.ExcludeAddresses
                 );
+                if (args.State.empty())
+                    return stmt.Bind(
+                        args.Language,
+                        _locationStr,
+                        args.MyTag,
+                        args.TheirTags,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses
+                    );
+                else
+                    return stmt.Bind(
+                        args.Language,
+                        _locationStr,
+                        args.MyTag,
+                        args.TheirTags,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses,
+                        args.Page.TopHeight,
+                        minHeight,
+                        args.ExcludeAddresses.empty(),
+                        args.ExcludeAddresses,
+                        stateJson,
+                        stateJson
+                    );
             },
             [&] (Stmt& stmt) {
                 stmt.Select([&](Cursor& cursor) {
